@@ -239,4 +239,4 @@ async def pctips(ctx):
 
 
 #runs bot
-client.run('token')
+client.run('NzYwNzIwOTc3NjkxOTM0NzUy.X3QKng.-uKAhDxO3RBhCeCU27Li2LW-NEk')
