@@ -58,7 +58,7 @@ async def help(ctx):
     helpful_embed.add_field(name="say", value="repeats what you say after the command", inline=False)
     helpful_embed.add_field(name="spam", value="spams @ everyone", inline=False)
     helpful_embed.add_field(name="modcmds", value="Shows a list of commands for Mods/Admins", inline=False)
-    #helpful_embed.add_field(name="join", value="makes the bot join the channel your in", inline=False)
+    helpful_embed.add_field(name="join", value="makes the bot join the channel your in", inline=False)
     helpful_embed.add_field(name="pctips", value="gives you a good tip for your pc.", inline=False)
     await ctx.send(embed=helpful_embed)
 
@@ -144,10 +144,10 @@ async def mute(ctx, member : discord.Member=None, reason=": No reason has been p
     await ctx.send(embed=muted)
 
 
-#@client.command()
-#async def join(ctx):
-    #channel = ctx.author.voice.channel
-    #await channel.connect()
+@client.command()
+async def join(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
 
 @client.command()
 @commands.has_permissions(administrator=True)
