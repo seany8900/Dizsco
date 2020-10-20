@@ -18,6 +18,16 @@ import json
 client = commands.Bot(command_prefix='?')
 client.remove_command("help")
 
+
+#nono words
+
+with open('swearWords.txt', 'r') as file:
+    swears = file.read().strip().lower().split(', ')
+
+
+
+
+
 #declaring commands
 
 
@@ -35,7 +45,22 @@ async def on_ready():
 async def on_command_error(ctx, error):
     embed1 = discord.Embed(title="", desc="", colour=discord.Colour.blue())   
     embed1.add_field(name="⚠️Error⚠️", value=error)    
-    await ctx.send(embed=embed1)     
+    await ctx.send(embed=embed1)  
+    
+    
+    
+@client.event 
+async def on_message(message):
+    
+    if any(swears in message.content.strip().lower() for swears in swears):
+           
+        await message.delete()
+        await message.channel.send(f"{message.author.mention}, don't say that word")
+        await client.process_commands(message)
+    else:
+            await client.process_commands(message)
+    
+   
 
 @client.event
 async def on_member_join(member):
