@@ -225,13 +225,15 @@ async def spam(ctx):
         await ctx.send('@everyone')
 
 
-@client.command(name="clear", aliases=["purge"])#clear command
+@client.command(name="clear", aliases=["purge"])
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, limit: int ):
     
-    await ctx.message.delete()
-    await ctx.channel.purge(limit=limit)
-    await ctx.send("messages deleted")
+  
+    await ctx.channel.purge(limit=limit + 1)
+    await ctx.send(f"⚠️`{limit} messages` have been deleted⚠️")
+    time.sleep(3)
+    await ctx.channel.purge(limit= 1)
     
     
 @client.command()#gives tips for pc users
