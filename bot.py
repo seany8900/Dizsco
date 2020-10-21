@@ -29,8 +29,8 @@ with open('swearWords.txt', 'r') as file:
 
 
 
-#declaring commands
 
+#passive events like automod and error handling
 
 @client.event
 async def on_ready():
@@ -63,9 +63,9 @@ async def on_message(message):
     
    
 
+#list of commands
 
-
-@client.command()
+@client.command()#help command
 async def help(ctx):
     helpful_embed = discord.Embed(title="Commands", description="This is a list of commands", colour=discord.Colour.blue())
     helpful_embed.add_field(name="help", value="Shows this message", inline=False)
@@ -81,14 +81,14 @@ async def help(ctx):
     await ctx.send(embed=helpful_embed)
 
 
-@client.command()
+@client.command()#test command
 async def test(ctx, *, content='Tests the bot and its ping'):
     embed = discord.Embed(title="", colour=discord.Colour.blue())
     embed.add_field(name="⚠️Test⚠️", value=f"If you see this message I am working. My ping is {round(client.latency * 1000)}ms")
     await ctx.send(embed=embed)
 
 
-@client.command()
+@client.command()#help mods command
 @commands.has_permissions(manage_messages=True)
 async def modcmds(ctx):
     cmds = discord.Embed(title="Mod/Admin commands", desc="Commands only Mods/Admins can use", colour=discord.Colour.blue())
@@ -108,8 +108,8 @@ async def modcmds(ctx):
     cmds.add_field(name="rules example", value="```?rules [rule number] [rule description] continue...```", inline=False)
     await ctx.message.delete()
     await ctx.author.send(embed=cmds)
-#Mod Cmds
-@client.command()
+
+@client.command()#kick command
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, member : discord.Member, *, reason=": No reason has been provided"):
     print('Kick called for...')
@@ -122,7 +122,7 @@ async def kick(ctx, member : discord.Member, *, reason=": No reason has been pro
 
 
 
-@client.command()
+@client.command()#ban command
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member : discord.Member, *, reason=": No reason has been provided"):
     print('Ban called for...')
@@ -135,7 +135,7 @@ async def ban(ctx, member : discord.Member, *, reason=": No reason has been prov
 
 
 
-@client.command()
+@client.command()#unban command
 @commands.has_permissions(ban_members=True)
 async def unban(ctx, *, member):
     embed = discord.Embed(title='', description='', colour = discord.Colour.blue())
@@ -152,7 +152,7 @@ async def unban(ctx, *, member):
             return
 
 
-@client.command()
+@client.command()#mute command
 @commands.has_permissions(manage_messages=True)
 async def mute(ctx, member : discord.Member=None, reason=": No reason has been provided"):
     role = discord.utils.get(ctx.guild.roles, name = "muted")
@@ -162,12 +162,12 @@ async def mute(ctx, member : discord.Member=None, reason=": No reason has been p
     await ctx.send(embed=muted)
 
 
-@client.command()
+@client.command()#join command
 async def join(ctx):
     channel = ctx.author.voice.channel
     await channel.connect()
 
-@client.command()
+@client.command()#rules command
 @commands.has_permissions(administrator=True)
 async def rules(ctx, *, arg):
     embed = discord.Embed(title='Rules', description=arg, colour=discord.Colour.blue())
@@ -179,7 +179,7 @@ async def rules(ctx, *, arg):
 
 
 
-@client.command()
+@client.command()#unmute command
 @commands.has_permissions(manage_messages=True)
 async def unmute(ctx, member : discord.Member=None):
     
@@ -192,7 +192,7 @@ async def unmute(ctx, member : discord.Member=None):
 
 
 
-@client.command()
+@client.command()#oreos spam
 @commands.is_nsfw()
 async def oreosforever(ctx):
     for i in range(999):
@@ -201,14 +201,14 @@ async def oreosforever(ctx):
 
 
 @client.command()
-@commands.is_nsfw()
+@commands.is_nsfw()#oreos lol
 async def oreos(ctx):
     for i in range(5):
         await ctx.send('https://cdn.discordapp.com/attachments/724511749516165211/756566771716194454/oreos.mov')
     
 
 
-@client.command()
+@client.command()#say command
 async def say(ctx, *, arg):
     await ctx.message.delete()
     await ctx.send(arg)
@@ -218,14 +218,14 @@ async def say(ctx, *, arg):
 
     
     
-@client.command()
+@client.command()#spam
 @commands.has_permissions(manage_messages=True)
 async def spam(ctx):
     for i in range(100):
         await ctx.send('@everyone')
 
 
-@client.command(name="clear", aliases=["purge"])
+@client.command(name="clear", aliases=["purge"])#clear command
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, limit: int ):
     
@@ -234,7 +234,7 @@ async def clear(ctx, limit: int ):
     await ctx.send("messages deleted")
     
     
-@client.command()
+@client.command()#gives tips for pc users
 async def pctips(ctx):
     
     
@@ -251,7 +251,7 @@ async def pctips(ctx):
 
 
         
-@client.command()
+@client.command()#sends memes
 async def meme(ctx):
     memes = [
         'https://cdn.discordapp.com/attachments/765429164480004158/768251989687271474/video0.mp4',
