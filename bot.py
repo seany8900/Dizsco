@@ -10,6 +10,7 @@ import time
 import random
 import asyncio
 import json
+import re
 
 
 
@@ -62,16 +63,7 @@ async def on_message(message):
     
    
 
-@client.event
-async def on_member_join(member):
-    join = discord.Embed(description=f"Welcome to the server {member.name}", colour=discord.Colour.blue())
-    join.set_thumbnail(url=f"{member.avatar_url}")
 
-    join.set_author(name=f"{member.name}", icon_url=f"{member.avatar_url}")
-    join.set_footer(text=f"{member.guild}", icon_url=f"{member.guild.icon_url}")
-    
-    channel = client.get_channel(id=765429164480004158)
-    await ctx.channel.send(embed=join)
 
 @client.command()
 async def help(ctx):
@@ -85,6 +77,7 @@ async def help(ctx):
     helpful_embed.add_field(name="modcmds", value="Shows a list of commands for Mods/Admins", inline=False)
     helpful_embed.add_field(name="join", value="makes the bot join the channel your in", inline=False)
     helpful_embed.add_field(name="pctips", value="gives you a good tip for your pc.", inline=False)
+    helpful_embed.add_field(name="meme", value="sends a bad meme", inline=False)
     await ctx.send(embed=helpful_embed)
 
 
@@ -258,7 +251,37 @@ async def pctips(ctx):
 
 
         
-
+@client.command()
+async def meme(ctx):
+    memes = [
+        'https://cdn.discordapp.com/attachments/765429164480004158/768251989687271474/video0.mp4',
+        'https://cdn.discordapp.com/attachments/765429164480004158/768251205637505054/video1.mp4',
+        'https://cdn.discordapp.com/attachments/765429164480004158/768251204777279488/video0.mov',
+        'https://cdn.discordapp.com/attachments/765429164480004158/768251201497071616/video0.mp4',
+        'https://cdn.discordapp.com/attachments/765429164480004158/768252738126741535/video0_1.mp4',
+        'https://cdn.discordapp.com/attachments/765429164480004158/768252988006334494/mmm.jpg',
+        'https://cdn.discordapp.com/attachments/765429164480004158/768253300679639060/Eh2WsS4VoAA-gp6.png',
+        'https://cdn.discordapp.com/attachments/754761389700284438/767905418747314206/video0.mov',
+        'https://cdn.discordapp.com/attachments/754761389700284438/767904223328600074/bradenjames__20201019_171704_0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/767903967866650644/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/767834201872793610/discord._.chan_20201016_103802_0.mp4',  
+        'https://cdn.discordapp.com/attachments/754761389700284438/767900546048458762/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765715209787539486/video0.mov',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765714722178859048/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765712847426289704/yiff.yaff.snorff_20201013_160920_0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765713146132168764/itssarthurr.__20201013_161031_0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765711249706713178/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765708484678516756/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765708363299815424/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765707359796330497/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765706670079737886/nochillrick_20201012_211150_0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765706551075405834/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765706144852607006/video0.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765703773732995082/reelpods_20201012_175402_0.mp4',
+        'https://cdn.discordapp.com/attachments/722559237896536136/765318597022056448/I_give_you_fire_you_give_me_rock.mp4',
+        'https://cdn.discordapp.com/attachments/754761389700284438/765376178412191745/wholesomememesforalluwu_20201012_175130_0.mp4'
+    ]
+    await ctx.send(f'{random.choice(memes)}')
 
          
 
