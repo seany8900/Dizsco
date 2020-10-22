@@ -189,7 +189,7 @@ async def prefix(ctx, prefix):
 
 
 
-@client.command(name="hi" aliases=["he
+@client.command(name="hi", aliases=["he
 async def prefix(ctx, prefix):
    await ctx.send(f"Hello {ctx.author.mention}! My name is Dizsco I can do lots of things! Do {prefix}help to see what I can do. If you have any problems contact my creator seany#6969")                      
 
