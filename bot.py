@@ -426,4 +426,4 @@ async def meme(ctx):
 
 
 #runs bot
-client.run('NzYwNzIwOTc3NjkxOTM0NzUy.X3QKng.QY-EOkjcFGJYvKnvX-hR0ndruaE')
+client.run('token goes here')
