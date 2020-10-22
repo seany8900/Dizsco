@@ -191,6 +191,10 @@ async def prefix(ctx, prefix):
 
 @client.command(name="hi", aliases=["he
 async def prefix(ctx, prefix):
+   with open('prefixes.json', 'r')as f:
+        prefixes = json.load(f)
+
+    prefixes[str(ctx.guild.id)] = prefix                                 
    await ctx.send(f"Hello {ctx.author.mention}! My name is Dizsco I can do lots of things! Do {prefix}help to see what I can do. If you have any problems contact my creator seany#6969")                      
 
 
