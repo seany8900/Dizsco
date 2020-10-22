@@ -6,6 +6,7 @@ from discord import utils, Client
 from discord.ext.commands import has_permissions, MissingPermissions
 from traceback import format_exc
 from discord import member, Intents, Guild
+from discord.utils import get
 import time
 import random
 import asyncio
@@ -14,10 +15,28 @@ import re
 
 
 
+#custom prefixes
+def get_prefix(client, message):
+    with open('prefixes.json', 'r')as f:
+        prefixes = json.load(f)
+
+    return prefixes[str(message.guild.id)]
+
 
 #identifies prefix for commands
-client = commands.Bot(command_prefix='?')
+client = commands.Bot(command_prefix= get_prefix)
 client.remove_command("help")
+
+
+
+
+
+
+
+
+
+
+
 
 
 #nono words
@@ -29,8 +48,8 @@ with open('swearWords.txt', 'r') as file:
 
 
 
+#declaring commands
 
-#passive events like automod and error handling
 
 @client.event
 async def on_ready():
@@ -40,19 +59,40 @@ async def on_ready():
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="?help"))
 
 
+@client.event
+async def on_guild_join(guild):
+    with open('prefixes.json', 'r')as f:
+        prefixes = json.load(f)
+
+    prefixes[str(guild.id)] = '?'
+
+    with open('prefixes.json', 'w')as f:
+        json.dump(prefixes, f, indent=4)
+
+@client.event
+async def on_guild_remove(guild):
+    with open('prefixes.json', 'r')as f:
+        prefixes = json.load(f)
+
+    prefixes.pop(str(guild.id))
+
+    with open('prefixes.json', 'w')as f:
+        json.dump(prefixes, f, indent=4)
+
+
 
 @client.event
 #async def on_command_error(ctx, exc):
 async def on_command_error(ctx, error):
     embed1 = discord.Embed(title="", desc="", colour=discord.Colour.blue())   
     embed1.add_field(name="⚠️Error⚠️", value=error)    
-    await ctx.send(embed=embed1)  
-    
-    
-    
+    await ctx.send(embed=embed1)     
+
+
 @client.event 
 async def on_message(message):
     
+        
     if any(swears in message.content.strip().lower() for swears in swears):
            
         await message.delete()
@@ -60,12 +100,33 @@ async def on_message(message):
         await client.process_commands(message)
     else:
             await client.process_commands(message)
+
+
+
+
+
+
+
+
+@client.event
+async def on_member_join(member):
+    join = discord.Embed(description=f"Welcome to the server {member.mention}", colour=discord.Colour.blue())
+    join.set_thumbnail(url=f"{member.avatar_url}")
+
+    join.set_author(name=f"{member.name}", icon_url=f"{member.avatar_url}")
+    join.set_footer(text=f"{member.guild}", icon_url=f"{member.guild.icon_url}")
+    channel = discord.utils.get(member.guild.channels, name='general')
     
-   
+    await channel.send(embed=join)
 
-#list of commands
 
-@client.command()#help command
+
+
+
+
+
+
+@client.command()
 async def help(ctx):
     helpful_embed = discord.Embed(title="Commands", description="This is a list of commands", colour=discord.Colour.blue())
     helpful_embed.add_field(name="help", value="Shows this message", inline=False)
@@ -75,23 +136,26 @@ async def help(ctx):
     helpful_embed.add_field(name="say", value="repeats what you say after the command", inline=False)
     helpful_embed.add_field(name="spam", value="spams @ everyone", inline=False)
     helpful_embed.add_field(name="modcmds", value="Shows a list of commands for Mods/Admins", inline=False)
-    helpful_embed.add_field(name="join", value="makes the bot join the channel your in", inline=False)
+    helpful_embed.add_field(name="join", value="makes the bot join the voice channel your in", inline=False)
+    helpful_embed.add_field(name="leave", value="makes the bot leave the voice channel your in", inline=False)
     helpful_embed.add_field(name="pctips", value="gives you a good tip for your pc.", inline=False)
     helpful_embed.add_field(name="meme", value="sends a bad meme", inline=False)
     await ctx.send(embed=helpful_embed)
 
 
-@client.command()#test command
+@client.command()
 async def test(ctx, *, content='Tests the bot and its ping'):
     embed = discord.Embed(title="", colour=discord.Colour.blue())
     embed.add_field(name="⚠️Test⚠️", value=f"If you see this message I am working. My ping is {round(client.latency * 1000)}ms")
     await ctx.send(embed=embed)
 
 
-@client.command()#help mods command
+@client.command()
 @commands.has_permissions(manage_messages=True)
 async def modcmds(ctx):
     cmds = discord.Embed(title="Mod/Admin commands", desc="Commands only Mods/Admins can use", colour=discord.Colour.blue())
+    cmds.add_field(name="prefix", value="changes the prefix", inline=False)
+    cmds.add_field(name="prefix example", value="```?prefix [new_prefix]```", inline=False)
     cmds.add_field(name="ban", value="bans a user from the guild", inline=False)
     cmds.add_field(name="ban example", value="```?ban [user] [reason]```", inline=False)
     cmds.add_field(name="unban", value="unbans a user from the guild", inline=False)
@@ -109,20 +173,42 @@ async def modcmds(ctx):
     await ctx.message.delete()
     await ctx.author.send(embed=cmds)
 
-@client.command()#kick command
+
+@client.command()
+@commands.has_permissions(administrator=True)
+async def prefix(ctx, prefix):
+    with open('prefixes.json', 'r')as f:
+        prefixes = json.load(f)
+
+    prefixes[str(ctx.guild.id)] = prefix
+
+    with open('prefixes.json', 'w')as f:
+        json.dump(prefixes, f, indent=4)
+    await ctx.send(f'⚠️Prefix changed to: `{prefix}`⚠️')
+
+
+
+
+
+
+
+
+
+#Mod Cmds
+@client.command()
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, member : discord.Member, *, reason=": No reason has been provided"):
     print('Kick called for...')
     await member.kick(reason=reason)
     print('Kicking...')
     kicembed = discord.Embed(title="", desc="", colour=discord.Colour.blue())
-    kicembed.add_field(name=f"Kicked {member.mention}", value=f"{member.mention} has been kicked for {reason}")
+    kicembed.add_field(name=f"Kicked {member}", value=f"{member.mention} has been kicked for {reason}")
     print('Member kicked')
     await ctx.send(embed=kicembed)
 
 
 
-@client.command()#ban command
+@client.command()
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member : discord.Member, *, reason=": No reason has been provided"):
     print('Ban called for...')
@@ -135,7 +221,7 @@ async def ban(ctx, member : discord.Member, *, reason=": No reason has been prov
 
 
 
-@client.command()#unban command
+@client.command()
 @commands.has_permissions(ban_members=True)
 async def unban(ctx, *, member):
     embed = discord.Embed(title='', description='', colour = discord.Colour.blue())
@@ -152,7 +238,7 @@ async def unban(ctx, *, member):
             return
 
 
-@client.command()#mute command
+@client.command()
 @commands.has_permissions(manage_messages=True)
 async def mute(ctx, member : discord.Member=None, reason=": No reason has been provided"):
     role = discord.utils.get(ctx.guild.roles, name = "muted")
@@ -162,12 +248,31 @@ async def mute(ctx, member : discord.Member=None, reason=": No reason has been p
     await ctx.send(embed=muted)
 
 
-@client.command()#join command
+@client.command()
 async def join(ctx):
     channel = ctx.author.voice.channel
     await channel.connect()
 
-@client.command()#rules command
+
+
+@client.command()
+async def leave(ctx):  
+    await ctx.voice_client.disconnect()
+
+
+    
+        
+
+    
+     
+
+
+
+    
+    
+    
+
+@client.command()
 @commands.has_permissions(administrator=True)
 async def rules(ctx, *, arg):
     embed = discord.Embed(title='Rules', description=arg, colour=discord.Colour.blue())
@@ -179,7 +284,7 @@ async def rules(ctx, *, arg):
 
 
 
-@client.command()#unmute command
+@client.command()
 @commands.has_permissions(manage_messages=True)
 async def unmute(ctx, member : discord.Member=None):
     
@@ -192,7 +297,7 @@ async def unmute(ctx, member : discord.Member=None):
 
 
 
-@client.command()#oreos spam
+@client.command()
 @commands.is_nsfw()
 async def oreosforever(ctx):
     for i in range(999):
@@ -201,14 +306,14 @@ async def oreosforever(ctx):
 
 
 @client.command()
-@commands.is_nsfw()#oreos lol
+@commands.is_nsfw()
 async def oreos(ctx):
     for i in range(5):
         await ctx.send('https://cdn.discordapp.com/attachments/724511749516165211/756566771716194454/oreos.mov')
     
 
 
-@client.command()#say command
+@client.command()
 async def say(ctx, *, arg):
     await ctx.message.delete()
     await ctx.send(arg)
@@ -218,7 +323,7 @@ async def say(ctx, *, arg):
 
     
     
-@client.command()#spam
+@client.command()
 @commands.has_permissions(manage_messages=True)
 async def spam(ctx):
     for i in range(100):
@@ -236,7 +341,7 @@ async def clear(ctx, limit: int ):
     await ctx.channel.purge(limit= 1)
     
     
-@client.command()#gives tips for pc users
+@client.command()
 async def pctips(ctx):
     
     
@@ -248,12 +353,12 @@ async def pctips(ctx):
         "**Anti-Virus**. Have you ever heard someone say *brain.exe is all I need* or *windows defender is good enough*. While they can be true even being smart on the internet can very rarely keep you virus free and Windows Defender takes a lot of configuration to make it good. If you want a good **FREE** AntiVirus I recommend https://www.bitdefender.com/solutions/free.html or https://usa.kaspersky.com/free-antivirus",
         '**Adblocking**. I think having an Adblock is very important. Have you ever been trying to install minecraft mods and you see a fake download button? That is a very good way to get a virus. Thats why having an adblock is very helpful not only can it stop annoying ads on youtube and twitch but it also can protect you from *malvertising*. https://chrome.google.com/webstore/detail/adblock-%E2%80%94-best-ad-blocker/gighmmpiobklfepjocnamgkkbiglidom',
         '**VirusTotal**. Have you ever downloaded something and it seems sketchy, like *Free Among Us* or *Roblox hacks*? Well fear no more because with VirusTotal you can scan sketchy links and files with multiple AntiVirus engines *for free*. Some things can be *false positives* though so be sure to look at the user rating too. https://www.virustotal.com/gui/',
+        '**Sorry I had to**. https://youtu.be/rSvBFm_MuXw'
     ]
     await ctx.send(f'{random.choice(tips)}')
 
 
-        
-@client.command()#sends memes
+@client.command()
 async def meme(ctx):
     memes = [
         'https://cdn.discordapp.com/attachments/765429164480004158/768251989687271474/video0.mp4',
@@ -281,7 +386,39 @@ async def meme(ctx):
         'https://cdn.discordapp.com/attachments/754761389700284438/765706144852607006/video0.mp4',
         'https://cdn.discordapp.com/attachments/754761389700284438/765703773732995082/reelpods_20201012_175402_0.mp4',
         'https://cdn.discordapp.com/attachments/722559237896536136/765318597022056448/I_give_you_fire_you_give_me_rock.mp4',
-        'https://cdn.discordapp.com/attachments/754761389700284438/765376178412191745/wholesomememesforalluwu_20201012_175130_0.mp4'
+        'https://cdn.discordapp.com/attachments/754761389700284438/765376178412191745/wholesomememesforalluwu_20201012_175130_0.mp4',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557919980748810/image8.png',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557919171772456/image5.png',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557917959618596/image2.png',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557917280010280/image0.png',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557706713497630/image7.png',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557705907929118/image4.jpg',
+        'https://cdn.discordapp.com/attachments/681580967877410845/768557704339390474/image0.png',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768560747197366322/video0-1.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768562591206735973/video0.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768562620415868946/video0.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768562831787950080/video0.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768563000508153917/video0.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768563615716212776/video0.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768565480335343656/video0.mp4 , https://cdn.discordapp.com/attachments/755257724547366935/768565480604303390/video1.mp4',
+        'https://cdn.discordapp.com/attachments/755257724547366935/768567446835429406/video0-1.mov',
+        'https://cdn.discordapp.com/attachments/754761389700284438/768253045028945930/video0.mp4',
+        'https://cdn.discordapp.com/attachments/702687635579338762/766179182559756288/video0.mp4',
+        'https://cdn.discordapp.com/attachments/702687635579338762/763425790380736512/GANGSTAARRRRRRRRR.mp4',
+        'https://cdn.discordapp.com/attachments/702687635579338762/753658326956507156/video0_4.mp4',
+        'https://www.youtube.com/watch?v=blgvslrfYV8&ab_channel=surrealentertainment',
+        'https://cdn.discordapp.com/attachments/702687635579338762/749196743610204160/Redacted-4.mp4',
+        'https://cdn.discordapp.com/attachments/702687635579338762/748554094800666684/g.mp4',
+        'https://cdn.discordapp.com/attachments/702687635579338762/748483608020385872/cat_fade-1.mp4',
+        'https://www.youtube.com/watch?v=IdoD2147Fik',
+        'https://cdn.discordapp.com/attachments/702687635579338762/748444251498479677/video0.mp4',
+        'https://cdn.discordapp.com/attachments/742761953973502023/744294341375164466/video0.mp4',
+        'https://cdn.discordapp.com/attachments/746547171645587608/746932785935024242/Hot_anime_girls_1.mp4',
+        'https://cdn.discordapp.com/attachments/702687635579338762/746430420157202563/video0.mov',
+        'https://cdn.discordapp.com/attachments/742776979119407135/743248903851212891/video0.mp4',
+        'https://youtu.be/p5L9-k0uV2A',
+        'https://www.youtube.com/watch?v=3KxEp9DURCc',
+        'https://cdn.discordapp.com/attachments/702687635579338762/739216403651100713/video7.mp4',
     ]
     await ctx.send(f'{random.choice(memes)}')
 
@@ -289,4 +426,4 @@ async def meme(ctx):
 
 
 #runs bot
-client.run(' ')
+client.run('NzYwNzIwOTc3NjkxOTM0NzUy.X3QKng.QY-EOkjcFGJYvKnvX-hR0ndruaE')
